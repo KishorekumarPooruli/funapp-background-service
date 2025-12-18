@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "funapp_background_service": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7199",
+      "launchBrowser": false
+    }
+  }
+}

@@ -12,7 +12,7 @@ public class TimerTriggerFunctions
         _logger = loggerFactory.CreateLogger<TimerTriggerFunctions>();
     }
 
-    [Function("TimerTriggerFunctions")]
+    [Function("RunEvery24Hours")]
     public void Run([TimerTrigger("%DailySchedule%")] TimerInfo myTimer)
     {
         _logger.LogInformation("" +

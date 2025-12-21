@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/azure/functions-action
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy dotnet core app to Azure Function App - funapp-background-service
+name: Build and deploy dotnet isolated app to Azure Function App - funapp-background-service
 
 on:
   push:
@@ -10,32 +10,32 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # set this to the path to your web app project, defaults to the repository root
-  DOTNET_VERSION: '8.0.x' # set this to the dotnet version to use
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: './output'   # publish folder
+  DOTNET_VERSION: '8.0.x'                     # dotnet version
 
 jobs:
   build-and-deploy:
     runs-on: windows-latest
     permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
+      id-token: write   # required for azure/login OIDC
+      contents: read
 
     steps:
-      - name: 'Checkout GitHub Action'
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
-        uses: actions/setup-dotnet@v1
+      - name: Setup .NET ${{ env.DOTNET_VERSION }}
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: 'Resolve Project Dependencies Using Dotnet'
+      - name: Publish Function App
         shell: pwsh
         run: |
-          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-          dotnet build --configuration Release --output ./output
-          popd
-      
+          dotnet publish ./YOUR_PROJECT.csproj `
+            --configuration Release `
+            --output ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -43,11 +43,9 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_A32ACAF2EBB34A7397CB6FADF4623D9C }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_FEC3472D36C442DD9B0B7F545E7BAA7D }}
 
-      - name: 'Run Azure Functions Action'
+      - name: Deploy to Azure Functions
         uses: Azure/functions-action@v1
-        id: fa
         with:
           app-name: 'funapp-background-service'
           slot-name: 'Production'
-          package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
-          
+          package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}

@@ -12,10 +12,24 @@ public class QueueStorageTriggerFunction
         _logger = logger;
     }
 
-    [Function("ReceiveQueueTrigger")]
+    //// [Function("ReceiveQueueTrigger")]
     public void Run(
-        [QueueTrigger("queue-azure-function", Connection = "AzureWebJobsStorage")]string message)
+        [QueueTrigger("queue-azure-function", Connection = "AzureWebJobsStorage")] string message)
     {
         _logger.LogInformation("C# Queue trigger function processed: {messageText}", message);
+    }
+
+    [Function("ReceiveAndSendQueueTrigger")]
+    [QueueOutput("queue-azure-function-output")]
+    public string[] QueueInputOutputFunction(
+        [QueueTrigger("queue-azure-function")] string message)
+    {
+        _logger.LogInformation($"C# Queue trigger function processed: {message} from (queue-azure-function)");
+        message = message + "- Processed";
+        string[] messages = new string[] { message };
+        _logger.LogInformation($"C# Queue trigger function processed: {message} to (queue-azure-function-output)");
+
+        // Queue Output messages
+        return messages;
     }
 }

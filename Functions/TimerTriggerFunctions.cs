@@ -1,7 +1,7 @@
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
-namespace funapp_background_service;
+namespace funapp_background_service.Functions;
 
 public class TimerTriggerFunctions
 {
